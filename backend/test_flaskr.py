@@ -119,7 +119,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['page'])
         self.assertTrue(data['total_questions'])
         self.assertTrue(data['current_category'])
-        
+#TODO add a test for quizes
 # Make the tests conveniently executable
 if __name__ == "__main__":
     unittest.main()
