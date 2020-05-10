@@ -153,12 +153,15 @@ def create_app(test_config=None):
   Create a GET endpoint to get questions based on category. 
   '''
   @app.route('/categories/<int:category_id>/questions')
-  def get_questions_by_category(category_id):
+  def get_questions_by_category(category_id, paginate=True):
     page = request.args.get('page', 1, int)
     category = Category.query.filter_by(id=category_id).first()
     questions = Question.query.filter_by(category=str(category.id)).all()
     total_questions = len(questions)
-    questions = paginate_response(page, questions)
+    if paginate: 
+      questions = paginate_response(page, questions)
+    else:
+      return [question.format() for question in questions]
     return jsonify({'success': True,
         'questions': questions,
         'page': page,
@@ -178,7 +181,24 @@ def create_app(test_config=None):
   This endpoint should take category and previous question parameters 
   and return a random questions within the given category, 
   if provided, and that is not one of the previous questions. 
-
+  '''
+  @app.route('/quizzes', methods=['POST'])
+  def quizzes():
+    payload = request.get_json()
+    previous_questions = payload.get("previous_questions", []) 
+    category = payload.get("quiz_category",'').get('id','')
+    if category:
+      questions = get_questions_by_category(category, paginate=False)
+    else: 
+      questions = [question.format() for question in Question.query.all()]
+    if previous_questions:
+      questions = [question for question in questions if question['id'] not in previous_questions]
+    random_question =  random.choice(questions) if questions else False
+    return jsonify({
+      "success": True,
+      "question": random_question
+    })
+  '''
   TEST: In the "Play" tab, after a user selects "All" or a category,
   one question at a time is displayed, the user is allowed to answer
   and shown whether they were correct or not. 
