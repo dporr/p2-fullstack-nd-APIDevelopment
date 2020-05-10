@@ -49,7 +49,7 @@ def create_app(test_config=None):
   including pagination (every 10 questions). 
   This endpoint should return a list of questions, 
   number of total questions, current category, categories. 
-'''
+  '''
   def paginate_response(page, questions):
     start = (page - 1) * QUESTIONS_PER_PAGE
     end = start + QUESTIONS_PER_PAGE
@@ -100,13 +100,30 @@ def create_app(test_config=None):
   Create an endpoint to POST a new question, 
   which will require the question and answer text, 
   category, and difficulty score.
+  '''
+  @app.route('/questions', methods=['POST'])
+  def create_question():
+    payload = request.get_json()
+    print(payload)
+    question = payload.get('question', '')
+    answer = payload.get('answer','')
+    category =  payload.get('category', '')
+    difficulty = payload.get('difficulty', '')
+    print(payload)
+    if not (question and answer and category and difficulty): abort(422)
+    new_question = Question(question=question, answer=answer, category=category, difficulty=difficulty)
+    new_question.insert()
+    question_id = new_question.id
+    return jsonify({
+      "success": True,
+      "question_id": question_id
+    })
 
+  '''
   TEST: When you submit a question on the "Add" tab, 
   the form will clear and the question will appear at the end of the last page
   of the questions list in the "List" tab.  
-  '''
 
-  '''
   @TODO: 
   Create a POST endpoint to get questions based on a search term. 
   It should return any questions for whom the search term 
