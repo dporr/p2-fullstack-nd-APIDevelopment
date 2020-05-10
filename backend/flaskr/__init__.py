@@ -61,13 +61,14 @@ def create_app(test_config=None):
   def get_questions():
     page = request.args.get('page', 1, int)
     questions = Question.query.all()
+    total_questions  = len(questions)
     questions = paginate_response(page, questions)
     categories = Category.query.all()
     categories = {category.id:category.type for category in categories}
     return jsonify({'success': True,
         'questions': questions,
         'page': page,
-        'totalQuestions': len(questions),
+        'totalQuestions': total_questions,
         'categories': categories,
         'current_category': "Null"
     })
