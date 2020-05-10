@@ -14,8 +14,12 @@ class TriviaTestCase(unittest.TestCase):
         """Define test variables and initialize app."""
         self.app = create_app()
         self.client = self.app.test_client
-        self.database_name = "trivia_test"
-        self.database_path = "postgres://{}/{}".format('localhost:5432', self.database_name)
+        user = os.getenv("POSTGRES_USER")
+        password = os.getenv("POSTGRES_PASSWORD")
+        host = os.getenv("POSTGRES_HOST")
+        database = os.getenv("APP_DATABASE")
+        database_path = f"postgresql://{user}:{password}@{host}:5432/{database}"
+        self.database_path = database_path
         setup_db(self.app, self.database_path)
 
         # binds the app to the current context
@@ -33,7 +37,7 @@ class TriviaTestCase(unittest.TestCase):
     TODO
     Write at least one test for each test for successful operation and for expected errors.
     """
-
+    
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
