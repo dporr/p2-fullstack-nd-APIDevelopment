@@ -88,6 +88,17 @@ class TriviaTestCase(unittest.TestCase):
         data = json.loads(res.data)
         '''Ensure our test question was deleted'''
         self.assertEqual(data["total_questions"], (questions_before_delete - 1))
+    
+    def test_POST_question(self):
+        test_question = {"question" : "this.state.question",
+        "answer": "this.state.answer",
+        "difficulty": 4,
+        "category": 1}
+        res = self.client().post('/questions', json=test_question)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['question_id'])
         
 # Make the tests conveniently executable
 if __name__ == "__main__":
