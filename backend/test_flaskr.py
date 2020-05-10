@@ -55,7 +55,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], True)
         self.assertTrue(data['questions'])
         self.assertTrue(data['page'])
-        self.assertTrue(data['totalQuestions'])
+        self.assertTrue(data['total_questions'])
         self.assertEqual(type(data['categories']), dict)
         self.assertTrue(data['current_category'])
 
@@ -63,8 +63,8 @@ class TriviaTestCase(unittest.TestCase):
     def test_Pagination(self):
         res = self.client().get('/questions')
         data = json.loads(res.data)
-        #print(type(data['totalQuestions']), type(int(data['totalQuestions']/QUESTIONS_PER_PAGE)))
-        for page in range(int(data['totalQuestions']/QUESTIONS_PER_PAGE)):
+        #print(type(data['total_questions']), type(int(data['total_questions']/QUESTIONS_PER_PAGE)))
+        for page in range(int(data['total_questions']/QUESTIONS_PER_PAGE)):
             '''page starts at 0, thus adding 1'''
             res = self.client().get(f'/questions?page={page + 1}')
             self.assertEqual(res.status_code, 200)
@@ -78,7 +78,7 @@ class TriviaTestCase(unittest.TestCase):
         res = self.client().get('/questions')
         data = json.loads(res.data)
         # '''Get questions + our test question'''
-        questions_before_delete = data["totalQuestions"]
+        questions_before_delete = data["total_questions"]
         res = self.client().delete(f'/questions/{test_question_id}')
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
@@ -86,7 +86,7 @@ class TriviaTestCase(unittest.TestCase):
         res = self.client().get('/questions')
         data = json.loads(res.data)
         '''Ensure our test question was deleted'''
-        self.assertEqual(data["totalQuestions"], (questions_before_delete - 1))
+        self.assertEqual(data["total_questions"], (questions_before_delete - 1))
         
 # Make the tests conveniently executable
 if __name__ == "__main__":
