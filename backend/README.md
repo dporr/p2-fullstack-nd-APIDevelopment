@@ -30,8 +30,27 @@ This will install all of the required packages we selected within the `requireme
 
 - [Flask-CORS](https://flask-cors.readthedocs.io/en/latest/#) is the extension we'll use to handle cross origin requests from our frontend server. 
 
+## General environment configutations
+This project makes use of environment variables in order to store sensitive data, ensure you run each command adding an empty space at the begining, before the ```export``` and avoid spaces arround equal sign, this way we avoid storing plaintext secrets on shell history file.
+```bash
+export POSTGRES_USER=[your db username]
+export POSTGRES_PASSWORD=[your z00per secret password string]
+export POSTGRES_HOST=[the FQDN or IP you database server uses]
+export APP_DATABASE=[The database schema you will use]
+```
 ## Database Setup
 With Postgres running, restore a database using the trivia.psql file provided. From the backend folder in terminal run:
+
+### Setting up database container
+First you will need to create a folder that will act as persistent volume for your postgres container
+```bash
+mkdir -p $HOME/docker/volumes/postgres
+```
+Then spin up the docker container. the -p setting indicates the port where your DB will be exposed, this should be consistent with the one you include in the app config. (read docker documentation for additional info)
+```bash
+sudo docker run --rm --name pg-docker -e POSTGRES_PASSWORD=$POSTGRES_PASSWORD -d -p 5432:5432 -v $HOME/docker/volumes/postgres:/var/lib/postgresql/data  postgres
+```
+### Populating the database
 ```bash
 psql trivia < trivia.psql
 ```
@@ -52,43 +71,193 @@ Setting the `FLASK_ENV` variable to `development` will detect file changes and r
 
 Setting the `FLASK_APP` variable to `flaskr` directs flask to use the `flaskr` directory and the `__init__.py` file to find the application. 
 
-## Tasks
+## Avaible Endpoints
 
-One note before you delve into your tasks: for each endpoint you are expected to define the endpoint and response data. The frontend will be a plentiful resource because it is set up to expect certain endpoints and response data formats already. You should feel free to specify endpoints in your own way; if you do so, make sure to update the frontend or you will get some unexpected behavior. 
+In order to play the game, a number of operations take place, each one of them belong to a specific endpoint. The available operations are:
 
-1. Use Flask-CORS to enable cross-domain requests and set response headers. 
-2. Create an endpoint to handle GET requests for questions, including pagination (every 10 questions). This endpoint should return a list of questions, number of total questions, current category, categories. 
-3. Create an endpoint to handle GET requests for all available categories. 
-4. Create an endpoint to DELETE question using a question ID. 
-5. Create an endpoint to POST a new question, which will require the question and answer text, category, and difficulty score. 
-6. Create a POST endpoint to get questions based on category. 
-7. Create a POST endpoint to get questions based on a search term. It should return any questions for whom the search term is a substring of the question. 
-8. Create a POST endpoint to get questions to play the quiz. This endpoint should take category and previous question parameters and return a random questions within the given category, if provided, and that is not one of the previous questions. 
-9. Create error handlers for all expected errors including 400, 404, 422 and 500. 
+- [GET categories](#getCategories)
+- [GET questions](#getQuestions1)
+- [GET questions (for a specific category)](#getQuestions2)
+- [DELETE question](#deleteQuestion)
+- [POST question (create question)](#createQuestion)
+- [POST question (search question)](#postQuestion)
+- [POST quizzes (to play game)](#postQuizzes)
 
-REVIEW_COMMENT
+***
+<h4 id="getCategories"></h4>
+
+> **GET '/categories'**
+
+This endpoint fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
+
+**Request Arguments:** 
+- *None*
+
+**Returns:** The return should include an success: True message along with the total categories (amount).
+Also should include an object with a single key, categories, that contains a object of id & category each of key:value pairs, something like this:
+
+```javascript
+{
+    "categories": [
+        {
+            "id": 1,
+            "type": "Science"
+        },
+        {
+            "id": 2,
+            "type": "Art"
+        },
+        {
+            "id": 3,
+            "type": "Geography"
+        },
+        {
+            "id": 4,
+            "type": "History"
+        },
+        {
+            "id": 5,
+            "type": "Entertainment"
+        },
+        {
+            "id": 6,
+            "type": "Sports"
+        }
+    ]}
 ```
-This README is missing documentation of your endpoints. Below is an example for your endpoint to get all categories. Please use it as a reference for creating your documentation and resubmit your code. 
+***
+<h4 id="getQuestions1"></h4>
 
-Endpoints
-GET '/categories'
-GET ...
-POST ...
-DELETE ...
+> **GET '/questions'**
 
-GET '/categories'
-- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
-- Request Arguments: None
-- Returns: An object with a single key, categories, that contains a object of id: category_string key:value pairs. 
-{'1' : "Science",
-'2' : "Art",
-'3' : "Geography",
-'4' : "History",
-'5' : "Entertainment",
-'6' : "Sports"}
+This endpoint fetches a dictionary of questions available.
 
+**Request Arguments:** 
+- *None*
+
+**Returns:** The return should include an success: True message along with the amount of questions available, the categories and current_category.
+It should also include an object with a single key, questions, that contains a object of id, category, difficulty, answer and question, each of key:value pairs, like this:
+
+```javascript
+{
+"questions": [
+        {
+            "answer": "Maya Angelou",
+            "category": 4,
+            "difficulty": 2,
+            "id": 5,
+            "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+        },
+        {
+            "answer": "Muhammad Ali",
+            "category": 4,
+            "difficulty": 1,
+            "id": 9,
+            "question": "What boxer's original name is Cassius Clay?"
+        }]
+}
 ```
+***
+<h4 id="getQuestions2"></h4>
 
+> **GET '/categories/"id"/questions'**
+
+This endpoint fetches a dictionary of questions available for a specific category.
+
+**Request Arguments:** 
+- *id* (integer) of the category
+
+**Returns:** The return should include an success: True message along with the amount of questions available on that category and current_category.
+It should also include an object with a single key, questions, that contains a object of id: question_string key:value pairs. 
+
+For example, for category id=1, response should look something like this:
+
+```javascript
+{'21' : "Who discovered penicillin?",
+'22' : "Hematology is a branch of medicine involving the study of what?",
+'20' : "What is the heaviest organ in the human body?",
+}
+```
+***
+<h4 id="deleteQuestion"></h4>
+
+> **DELETE '/questions/"id"'**
+
+This endpoint allows you to delete a question, based on its id.
+
+**Request Arguments:** 
+- *id* (integer) of the question to delete.
+
+**Returns:** An object with a success message, the id of the question deleted and the new amount of questions avaibale. 
+
+For example, for question id=1, if we had 21 questions, response should look somethinkg like this:
+
+```javascript
+{'success' : True,
+'deleted' : 1,
+'total_questions' : 20,
+}
+```
+***
+<h4 id="createQuestion"></h4>
+
+> **POST '/questions'**
+
+This endpoint allows you to POST a new question.
+
+**Request Arguments:** 
+- *question* (Text)
+- *answer* (Text)
+- *difficulty* (integer) 1 to 4.
+- *category* (integer) 1 to 6.
+
+**Returns:** An object with a success message, the id of the question created and the new amount of questions avaibale. 
+
+For example, for question id=1, if we had 21 questions, response should look somethinkg like this:
+
+```javascript
+{'success' : True,
+'created' : 25,
+'total_questions' : 21,
+}
+```
+***
+<h4 id="searchQuestion"></h4>
+
+> **POST '/questions/search'**
+
+This endpoint allows you to search for a question based on a search term, it is case sensitive.
+
+**Request Arguments:** 
+- *search_term* (Text)
+
+**Returns:** An object with a success message, the questions that match the criteria and the amount of these questions. 
+
+For example, for search_term='title', response should look somethinkg like this:
+
+```javascript
+{'success' : True,
+'questions' : [Question1,Question2],
+'total_questions' : 2,
+}
+```
+***
+<h4 id="postQuizzes"></h4>
+
+> **POST '/quizzes'**
+
+This endpoint allows you to play the game by getting a random question.
+
+**Request Arguments:** 
+- *None*
+
+**Returns:** An object with a success message and the new random question: It response should look somethinkg like this:
+
+```javascript
+{'success' : True,
+'questions' : 'some random question'
+}
+```
 
 ## Testing
 To run the tests, run
