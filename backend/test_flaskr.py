@@ -3,7 +3,7 @@ import unittest
 import json
 from flask_sqlalchemy import SQLAlchemy
 
-from flaskr import create_app
+from flaskr import create_app, QUESTIONS_PER_PAGE
 from models import setup_db, Question, Category
 
 
@@ -58,7 +58,17 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['totalQuestions'])
         self.assertEqual(type(data['categories']), dict)
         self.assertTrue(data['current_category'])
-        
+
+    '''Assume get_questuions passed. Test pagination capabilities'''
+    def test_Pagination(self):
+        res = self.client().get('/questions')
+        data = json.loads(res.data)
+        #print(type(data['totalQuestions']), type(int(data['totalQuestions']/QUESTIONS_PER_PAGE)))
+        for page in range(int(data['totalQuestions']/QUESTIONS_PER_PAGE)):
+            '''page starts at 0, thus adding 1'''
+            res = self.client().get(f'/questions?page={page + 1}')
+            self.assertEqual(res.status_code, 200)
+            self.assertEqual(data['success'], True)
 # Make the tests conveniently executable
 if __name__ == "__main__":
     unittest.main()
