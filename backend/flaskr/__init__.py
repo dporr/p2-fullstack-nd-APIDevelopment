@@ -156,8 +156,8 @@ def create_app(test_config=None):
   def get_questions_by_category(category_id, paginate=True):
     page = request.args.get('page', 1, int)
     category = Category.query.filter_by(id=category_id).first()
+    if not category: abort(404)
     questions = Question.query.filter_by(category=str(category.id)).all()
-    if not (category and questions): abort(404)
     total_questions = len(questions)
     if paginate: 
       questions = paginate_response(page, questions)
