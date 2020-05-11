@@ -106,12 +106,10 @@ def create_app(test_config=None):
   @app.route('/questions', methods=['POST'])
   def create_question():
     payload = request.get_json()
-    print(payload)
     question = payload.get('question', '')
     answer = payload.get('answer','')
     category =  payload.get('category', '')
     difficulty = payload.get('difficulty', '')
-    print(payload)
     if not (question and answer and category and difficulty): abort(422)
     new_question = Question(question=question, answer=answer, category=category, difficulty=difficulty)
     new_question.insert()
