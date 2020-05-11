@@ -63,6 +63,7 @@ def create_app(test_config=None):
     questions = Question.query.all()
     total_questions  = len(questions)
     questions = paginate_response(page, questions)
+    if not questions: abort(404)
     categories = Category.query.all()
     categories = {category.id:category.type for category in categories}
     return jsonify({'success': True,
