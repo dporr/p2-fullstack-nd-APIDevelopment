@@ -116,6 +116,20 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], True)
         self.assertTrue(data['question_id'])
     
+    def test_422_POST_question(self):
+        '''If the posted question, to be created, don't have the right schema
+        we abort the creation'''
+        test_question = {"qqqq" : "This will fail",
+        "Answer": "this.state.answer",
+        "some_data": 4,
+        "w00tw00t": 1}
+        res = self.client().post('/questions', json=test_question)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data["message"], "Unprocessable Entity")
+        
+    
     def test_POST_search(self):
         search = {"searchTerm": "a"}
         res = self.client().post('/questions/search', json=search)
