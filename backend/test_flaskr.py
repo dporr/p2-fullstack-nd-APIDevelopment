@@ -97,6 +97,14 @@ class TriviaTestCase(unittest.TestCase):
         '''Ensure our test question was deleted'''
         self.assertEqual(data["total_questions"], (questions_before_delete - 1))
     
+    def test_404_DELETE_question(self):
+        '''Try to delete an inexistent question ID''' 
+        res = self.client().delete('/questions/99999')
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "Not found")
+
     def test_POST_question(self):
         test_question = {"question" : "this.state.question",
         "answer": "this.state.answer",
