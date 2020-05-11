@@ -1,0 +1,7 @@
+__pycache__/*
+*.pyc
+.vscode/*
+node_modules/*
+#Note to reviewer: I already deleted node_modules folder
+#Also I'm using linux, so there's no need to exclude DStore and alike files as you mentione don you review
+#Finally my virtual env is hosted in ~/virtualenviorments at my hostmachine, so the venv is not part of my github repo and thre's no need to add it to the gitignore
