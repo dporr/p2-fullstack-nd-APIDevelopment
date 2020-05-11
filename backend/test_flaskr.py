@@ -60,6 +60,14 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(type(data['categories']), dict)
         self.assertTrue(data['current_category'])
 
+    def test_404_GET_questions(self):
+        '''Test for a page that dont exist'''
+        res = self.client().get('/questions?page=9999')
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "Not found")
+
     '''Assume get_questuions passed. Test pagination capabilities'''
     def test_Pagination(self):
         res = self.client().get('/questions')
@@ -73,7 +81,7 @@ class TriviaTestCase(unittest.TestCase):
 
     def test_DELETE_question(self):
         '''Insert a test question to be deleted'''
-        test_question = Question("question", "answer", "category", 5)
+        test_question = Question("question", "answer", 1, 5)
         test_question.insert()
         test_question_id = test_question.id
         res = self.client().get('/questions')
